@@ -1,18 +1,23 @@
 package com.employee.recordsystem.ui.panels;
 
 import com.employee.recordsystem.ui.MainFrame;
+import com.employee.recordsystem.ui.service.AuthService;
+import com.employee.recordsystem.dto.auth.JwtAuthenticationResponse;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class LoginPanel extends JPanel {
     
     private final MainFrame mainFrame;
     private final JTextField usernameField;
     private final JPasswordField passwordField;
+    private final AuthService authService;
 
     public LoginPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
+        this.authService = new AuthService();
         setLayout(new MigLayout("fill", "[][]", "[]20[][]20[]"));
         
         // Create components
@@ -57,13 +62,20 @@ public class LoginPanel extends JPanel {
             return;
         }
 
-        // TODO: Implement actual authentication
-        // For now, just simulate login
-        mainFrame.setCurrentUser(username, "ADMIN");
-        mainFrame.showEmployeePanel();
-        
-        // Clear fields
-        usernameField.setText("");
-        passwordField.setText("");
+        try {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            JwtAuthenticationResponse response = authService.login(username, password);
+            mainFrame.setCurrentUser(response.getUsername(), response.getRole());
+            mainFrame.showEmployeePanel();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Login failed: " + ex.getMessage(),
+                "Login Error",
+                JOptionPane.ERROR_MESSAGE);
+        } finally {
+            setCursor(Cursor.getDefaultCursor());
+            usernameField.setText("");
+            passwordField.setText("");
+        }
     }
 }

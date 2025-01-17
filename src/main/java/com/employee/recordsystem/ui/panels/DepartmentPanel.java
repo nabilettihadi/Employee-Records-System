@@ -1,17 +1,23 @@
 package com.employee.recordsystem.ui.panels;
 
+import com.employee.recordsystem.dto.DepartmentDTO;
+import com.employee.recordsystem.ui.service.DepartmentService;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.IOException;
+import java.util.List;
 
 public class DepartmentPanel extends JPanel {
     
     private final JTable departmentTable;
     private final DefaultTableModel tableModel;
+    private final DepartmentService departmentService;
 
     public DepartmentPanel() {
         setLayout(new MigLayout("fill", "[grow]", "[]10[]10[grow]"));
+        this.departmentService = new DepartmentService();
         
         // Create toolbar panel
         JPanel toolbarPanel = new JPanel(new MigLayout("fillx", "[]push[]", "[]"));
@@ -76,8 +82,20 @@ public class DepartmentPanel extends JPanel {
         
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> {
-            // TODO: Implement save functionality
-            dialog.dispose();
+            try {
+                DepartmentDTO newDepartment = new DepartmentDTO();
+                newDepartment.setName(nameField.getText());
+                newDepartment.setLocation(locationField.getText());
+                
+                departmentService.createDepartment(newDepartment);
+                loadDepartmentData();
+                dialog.dispose();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(dialog,
+                    "Error creating department: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
         });
         
         dialog.add(saveButton, "span 2, center");
@@ -88,15 +106,29 @@ public class DepartmentPanel extends JPanel {
     }
 
     private void loadDepartmentData() {
-        // TODO: Load actual data from service
-        // For now, add some sample data
-        Object[][] sampleData = {
-            {"DEPT001", "Information Technology", "John Doe", "25", "Building A", "2024-01-01", "Edit/Delete"},
-            {"DEPT002", "Human Resources", "Jane Smith", "10", "Building B", "2024-01-01", "Edit/Delete"}
-        };
-        
-        for (Object[] row : sampleData) {
-            tableModel.addRow(row);
+        try {
+            List<DepartmentDTO> departments = departmentService.getAllDepartments();
+            updateTableData(departments);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Error loading departments: " + ex.getMessage(),
+                "Load Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void updateTableData(List<DepartmentDTO> departments) {
+        tableModel.setRowCount(0);
+        for (DepartmentDTO department : departments) {
+            tableModel.addRow(new Object[]{
+                department.getId(),
+                department.getName(),
+                department.getManager() != null ? department.getManager().getName() : "Not Assigned",
+                department.getEmployeeCount(),
+                department.getLocation(),
+                department.getCreatedDate(),
+                "Edit/Delete"
+            });
         }
     }
 }

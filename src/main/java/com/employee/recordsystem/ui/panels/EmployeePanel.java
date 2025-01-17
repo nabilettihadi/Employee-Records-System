@@ -1,10 +1,14 @@
 package com.employee.recordsystem.ui.panels;
 
+import com.employee.recordsystem.dto.EmployeeDTO;
 import com.employee.recordsystem.model.EmploymentStatus;
+import com.employee.recordsystem.ui.service.EmployeeService;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.IOException;
+import java.util.List;
 
 public class EmployeePanel extends JPanel {
     
@@ -13,9 +17,11 @@ public class EmployeePanel extends JPanel {
     private final JTextField searchField;
     private final JComboBox<String> departmentFilter;
     private final JComboBox<EmploymentStatus> statusFilter;
+    private final EmployeeService employeeService;
 
     public EmployeePanel() {
         setLayout(new MigLayout("fill", "[grow]", "[]10[]10[grow]"));
+        this.employeeService = new EmployeeService();
         
         // Create toolbar panel
         JPanel toolbarPanel = new JPanel(new MigLayout("fillx", "[]10[]push[]10[]10[]", "[]"));
@@ -83,33 +89,70 @@ public class EmployeePanel extends JPanel {
     }
 
     private void showAddEmployeeDialog() {
-        // TODO: Implement add employee dialog
+        // TODO: Implement add employee dialog with service integration
         JOptionPane.showMessageDialog(this, "Add Employee Dialog - To be implemented");
     }
 
     private void performSearch() {
         String searchTerm = searchField.getText();
-        // TODO: Implement search functionality
-        System.out.println("Searching for: " + searchTerm);
+        try {
+            List<EmployeeDTO> employees = employeeService.searchEmployees(searchTerm);
+            updateTableData(employees);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Error searching employees: " + ex.getMessage(),
+                "Search Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void applyFilters() {
         String department = (String) departmentFilter.getSelectedItem();
         EmploymentStatus status = (EmploymentStatus) statusFilter.getSelectedItem();
-        // TODO: Implement filter functionality
-        System.out.println("Filtering - Department: " + department + ", Status: " + status);
+        
+        try {
+            List<EmployeeDTO> employees;
+            if (!"All Departments".equals(department)) {
+                employees = employeeService.getEmployeesByDepartment(1L); // TODO: Get actual department ID
+            } else if (status != null) {
+                employees = employeeService.getEmployeesByStatus(status.name());
+            } else {
+                employees = employeeService.getAllEmployees();
+            }
+            updateTableData(employees);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Error applying filters: " + ex.getMessage(),
+                "Filter Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void loadEmployeeData() {
-        // TODO: Load actual data from service
-        // For now, add some sample data
-        Object[][] sampleData = {
-            {"EMP001", "John Doe", "IT", "Developer", "ACTIVE", "2024-01-01", "john@example.com", "Edit/Delete"},
-            {"EMP002", "Jane Smith", "HR", "Manager", "ACTIVE", "2024-01-01", "jane@example.com", "Edit/Delete"}
-        };
-        
-        for (Object[] row : sampleData) {
-            tableModel.addRow(row);
+        try {
+            List<EmployeeDTO> employees = employeeService.getAllEmployees();
+            updateTableData(employees);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Error loading employees: " + ex.getMessage(),
+                "Load Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void updateTableData(List<EmployeeDTO> employees) {
+        tableModel.setRowCount(0);
+        for (EmployeeDTO employee : employees) {
+            tableModel.addRow(new Object[]{
+                employee.getEmployeeId(),
+                employee.getName(),
+                employee.getDepartment().getName(),
+                employee.getJobTitle(),
+                employee.getStatus(),
+                employee.getHireDate(),
+                employee.getEmail(),
+                "Edit/Delete"
+            });
         }
     }
 }
