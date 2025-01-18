@@ -1,5 +1,6 @@
 package com.employee.recordsystem.config;
 
+import com.employee.recordsystem.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;

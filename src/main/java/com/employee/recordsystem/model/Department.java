@@ -4,10 +4,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.util.List;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "departments")
 public class Department {
     
@@ -28,4 +32,13 @@ public class Department {
 
     @Column(name = "description")
     private String description;
+
+    public Department(String name) {
+        this.name = name;
+    }
+
+    public Department(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

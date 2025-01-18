@@ -4,7 +4,46 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="33941b40-897c-42e9-b35a-a29b663ab99f" name="Changes" comment="" />
+    <list default="true" id="33941b40-897c-42e9-b35a-a29b663ab99f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/mapper/EmployeeMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/mapper/EmployeeMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/Department.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/Department.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/repository/EmployeeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/repository/EmployeeRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/service/ReportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/service/ReportService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/panels/SearchPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/panels/SearchPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/config/OpenApiConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/config/OpenApiConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/controller/EmployeeController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/controller/EmployeeController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/model/AuditLog.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/model/RoleType.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/repository/AuditLogRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/repository/DepartmentRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/repository/EmployeeRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/repository/RoleRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/security/JwtAuthenticationEntryPoint.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/security/JwtAuthorizationFilter.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/security/SecurityConfig.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/security/SecurityService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/service/UserService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/service/impl/AuditServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/service/impl/AuthServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/service/impl/DepartmentServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/service/impl/EmployeeServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/service/impl/UserServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/ui/dialogs/DeleteConfirmationDialog.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/ui/dialogs/EmployeeDialog.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/ui/dialogs/ValidationDocumentListener.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/ui/service/AuthService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/ui/service/DepartmentService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/ui/service/EmployeeService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/ui/service/RetrofitConfig.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/ui/service/api/AuthApi.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/ui/service/api/DepartmentApi.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/employee/recordsystem/ui/service/api/EmployeeApi.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -24,37 +63,39 @@
     <option name="openDirectoriesWithSingleClick" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Maven.employee-records-system [clean,compile].executor&quot;: &quot;Run&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;Spring Boot.EmployeeRecordSystemApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/nabil/IdeaProjects/Employee-Records-System&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.poratu.idea.plugins.tomcat.setting.TomcatServersConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Maven.employee-records-system [clean,compile].executor": "Run",
+    "Maven.employee-records-system [clean,install].executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.EmployeeRecordSystemApplication.executor": "Run",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/nabil/IdeaProjects/Employee-Records-System",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.poratu.idea.plugins.tomcat.setting.TomcatServersConfigurable",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;oracle&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "oracle"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunAnythingCache">
     <option name="myCommands">
       <command value="mvn clean compile" />
+      <command value="mvn clean install" />
     </option>
   </component>
   <component name="RunManager">
@@ -92,7 +133,7 @@
       <updated>1737217821003</updated>
       <workItem from="1737217822128" duration="8705000" />
       <workItem from="1737227218706" duration="1285000" />
-      <workItem from="1737230258470" duration="1394000" />
+      <workItem from="1737230258470" duration="2744000" />
     </task>
     <servers />
   </component>

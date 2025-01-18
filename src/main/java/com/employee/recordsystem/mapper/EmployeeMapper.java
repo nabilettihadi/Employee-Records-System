@@ -2,7 +2,9 @@ package com.employee.recordsystem.mapper;
 
 import com.employee.recordsystem.dto.EmployeeDTO;
 import com.employee.recordsystem.model.Employee;
+import com.employee.recordsystem.model.Department;
 import com.employee.recordsystem.service.DepartmentService;
+import com.employee.recordsystem.mapper.DepartmentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
 public class EmployeeMapper {
 
     private final DepartmentService departmentService;
+    private final DepartmentMapper departmentMapper;
 
     public EmployeeDTO toDTO(Employee employee) {
         if (employee == null) {
@@ -22,8 +25,10 @@ public class EmployeeMapper {
         dto.setEmployeeId(employee.getEmployeeId());
         dto.setFullName(employee.getFullName());
         dto.setJobTitle(employee.getJobTitle());
-        dto.setDepartmentId(employee.getDepartment().getId());
-        dto.setDepartmentName(employee.getDepartment().getName());
+        if (employee.getDepartment() != null) {
+            dto.setDepartmentId(employee.getDepartment().getId());
+            dto.setDepartmentName(employee.getDepartment().getName());
+        }
         dto.setHireDate(employee.getHireDate().toLocalDate());
         dto.setEmploymentStatus(employee.getEmploymentStatus());
         dto.setEmail(employee.getEmail());
@@ -49,7 +54,14 @@ public class EmployeeMapper {
         employee.setEmployeeId(dto.getEmployeeId());
         employee.setFullName(dto.getFullName());
         employee.setJobTitle(dto.getJobTitle());
-        employee.setDepartment(departmentService.getDepartmentById(dto.getDepartmentId()));
+        
+        if (dto.getDepartmentId() != null) {
+            Department department = departmentMapper.toEntity(
+                departmentService.getDepartmentById(dto.getDepartmentId())
+            );
+            employee.setDepartment(department);
+        }
+        
         employee.setHireDate(dto.getHireDate().atStartOfDay());
         employee.setEmploymentStatus(dto.getEmploymentStatus());
         employee.setEmail(dto.getEmail());
