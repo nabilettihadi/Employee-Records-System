@@ -1,49 +1,81 @@
 package com.employee.recordsystem.ui.panels;
 
-import com.employee.recordsystem.ui.MainFrame;
-import com.employee.recordsystem.ui.service.AuthService;
 import com.employee.recordsystem.dto.auth.JwtAuthenticationResponse;
-import net.miginfocom.swing.MigLayout;
+import com.employee.recordsystem.dto.auth.LoginRequest;
+import com.employee.recordsystem.service.AuthService;
+import com.employee.recordsystem.ui.MainFrame;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
+@Component
+@RequiredArgsConstructor
 public class LoginPanel extends JPanel {
-    
-    private final MainFrame mainFrame;
-    private final JTextField usernameField;
-    private final JPasswordField passwordField;
     private final AuthService authService;
+    private final MainFrame mainFrame;
+    
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JButton loginButton;
+    private JLabel messageLabel;
 
-    public LoginPanel(MainFrame mainFrame) {
-        this.mainFrame = mainFrame;
-        this.authService = new AuthService();
-        setLayout(new MigLayout("fill", "[][]", "[]20[][]20[]"));
-        
-        // Create components
-        JLabel titleLabel = new JLabel("Employee Records Management System");
+    public void initializeUI() {
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Title
+        JLabel titleLabel = new JLabel("Employee Records System");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        
-        JLabel usernameLabel = new JLabel("Username:");
-        JLabel passwordLabel = new JLabel("Password:");
-        
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(20, 5, 30, 5);
+        add(titleLabel, gbc);
+
+        // Username
+        gbc.gridwidth = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        add(new JLabel("Username:"), gbc);
+
         usernameField = new JTextField(20);
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        add(usernameField, gbc);
+
+        // Password
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST;
+        add(new JLabel("Password:"), gbc);
+
         passwordField = new JPasswordField(20);
-        
-        JButton loginButton = new JButton("Login");
-        loginButton.setBackground(new Color(0, 120, 215));
-        loginButton.setForeground(Color.WHITE);
-        loginButton.setFocusPainted(false);
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        add(passwordField, gbc);
 
-        // Add components
-        add(titleLabel, "span 2, center, wrap");
-        add(usernameLabel, "right");
-        add(usernameField, "growx, wrap");
-        add(passwordLabel, "right");
-        add(passwordField, "growx, wrap");
-        add(loginButton, "span 2, center");
+        // Login button
+        loginButton = new JButton("Login");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(20, 5, 5, 5);
+        add(loginButton, gbc);
 
-        // Add action
+        // Message label
+        messageLabel = new JLabel(" ");
+        messageLabel.setForeground(Color.RED);
+        gbc.gridy = 4;
+        gbc.insets = new Insets(10, 5, 5, 5);
+        add(messageLabel, gbc);
+
+        // Add action listener
         loginButton.addActionListener(e -> handleLogin());
         
         // Add key listener for Enter key
@@ -51,31 +83,33 @@ public class LoginPanel extends JPanel {
     }
 
     private void handleLogin() {
-        String username = usernameField.getText();
+        String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
 
         if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                "Please enter both username and password",
-                "Login Error",
-                JOptionPane.ERROR_MESSAGE);
+            messageLabel.setText("Please enter both username and password");
             return;
         }
 
         try {
-            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            JwtAuthenticationResponse response = authService.login(username, password);
+            LoginRequest loginRequest = LoginRequest.builder()
+                .username(username)
+                .password(password)
+                .build();
+
+            JwtAuthenticationResponse response = authService.login(loginRequest);
+            messageLabel.setText("");
             mainFrame.setCurrentUser(response.getUsername(), response.getRole());
-            mainFrame.showEmployeePanel();
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
-                "Login failed: " + ex.getMessage(),
-                "Login Error",
-                JOptionPane.ERROR_MESSAGE);
-        } finally {
-            setCursor(Cursor.getDefaultCursor());
-            usernameField.setText("");
+            mainFrame.showMainPanel();
+        } catch (Exception e) {
+            messageLabel.setText("Invalid username or password");
             passwordField.setText("");
         }
+    }
+
+    public void clearFields() {
+        usernameField.setText("");
+        passwordField.setText("");
+        messageLabel.setText(" ");
     }
 }

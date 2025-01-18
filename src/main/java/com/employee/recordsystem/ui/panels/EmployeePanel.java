@@ -1,217 +1,258 @@
 package com.employee.recordsystem.ui.panels;
 
 import com.employee.recordsystem.dto.EmployeeDTO;
-import com.employee.recordsystem.model.EmploymentStatus;
-import com.employee.recordsystem.ui.service.EmployeeService;
+import com.employee.recordsystem.service.DepartmentService;
+import com.employee.recordsystem.service.EmployeeService;
+import com.employee.recordsystem.ui.dialogs.DeleteConfirmationDialog;
+import com.employee.recordsystem.ui.dialogs.EmployeeDialog;
+import lombok.RequiredArgsConstructor;
 import net.miginfocom.swing.MigLayout;
+import org.springframework.stereotype.Component;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.List;
 
+@Component
 public class EmployeePanel extends JPanel {
-    
-    private final JTable employeeTable;
-    private final DefaultTableModel tableModel;
-    private final JTextField searchField;
-    private final JComboBox<String> departmentFilter;
-    private final JComboBox<EmploymentStatus> statusFilter;
     private final EmployeeService employeeService;
+    private final DepartmentService departmentService;
+    private JTable employeeTable;
+    private DefaultTableModel tableModel;
+    private List<EmployeeDTO> employees;
 
-    public EmployeePanel() {
-        setLayout(new MigLayout("fill", "[grow]", "[]10[]10[grow]"));
-        this.employeeService = new EmployeeService();
-        
-        // Create toolbar panel
-        JPanel toolbarPanel = new JPanel(new MigLayout("fillx", "[]10[]push[]10[]10[]", "[]"));
-        
-        // Search components
-        searchField = new JTextField(20);
-        JButton searchButton = new JButton("Search");
-        
-        // Filter components
-        departmentFilter = new JComboBox<>(new String[]{"All Departments", "HR", "IT", "Finance"});
-        statusFilter = new JComboBox<>(EmploymentStatus.values());
-        
-        // Add button
-        JButton addButton = new JButton("Add Employee");
-        addButton.setBackground(new Color(0, 120, 215));
-        addButton.setForeground(Color.WHITE);
-        
-        // Add components to toolbar
-        toolbarPanel.add(searchField, "growx");
-        toolbarPanel.add(searchButton);
-        toolbarPanel.add(departmentFilter);
-        toolbarPanel.add(statusFilter);
-        toolbarPanel.add(addButton);
-        
-        // Create table
-        String[] columns = {
-            "ID", "Name", "Department", "Job Title", 
-            "Status", "Hire Date", "Email", "Actions"
-        };
-        tableModel = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == columns.length - 1; // Only actions column is editable
-            }
-        };
-        employeeTable = new JTable(tableModel);
-        employeeTable.setFillsViewportHeight(true);
-        
-        // Style table
-        employeeTable.setRowHeight(30);
-        employeeTable.getTableHeader().setBackground(new Color(240, 240, 240));
-        employeeTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
-        
-        // Add mouse listener for table actions
-        employeeTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent evt) {
-                int row = employeeTable.rowAtPoint(evt.getPoint());
-                int col = employeeTable.columnAtPoint(evt.getPoint());
-                if (row >= 0 && col == employeeTable.getColumnCount() - 1) {
-                    String employeeId = (String) employeeTable.getValueAt(row, 0);
-                    showTableActionPopup(evt.getComponent(), evt.getX(), evt.getY(), employeeId);
-                }
-            }
-        });
-        
-        // Add components to main panel
-        add(createTitlePanel(), "growx, wrap");
-        add(toolbarPanel, "growx, wrap");
-        add(new JScrollPane(employeeTable), "grow");
-        
-        // Add listeners
-        addButton.addActionListener(e -> showAddEmployeeDialog());
-        searchButton.addActionListener(e -> performSearch());
-        departmentFilter.addActionListener(e -> applyFilters());
-        statusFilter.addActionListener(e -> applyFilters());
-        
-        // Load initial data
-        loadEmployeeData();
+    public EmployeePanel(EmployeeService employeeService, DepartmentService departmentService) {
+        this.employeeService = employeeService;
+        this.departmentService = departmentService;
+        initializeUI();
     }
 
-    private JPanel createTitlePanel() {
-        JPanel titlePanel = new JPanel(new MigLayout("fillx", "[]push[]", "[]"));
-        JLabel titleLabel = new JLabel("Employee Management");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titlePanel.add(titleLabel);
-        return titlePanel;
+    public void initializeUI() {
+        // Use MigLayout for better component organization
+        setLayout(new MigLayout(
+            "fill, insets 10",
+            "[grow]",
+            "[][][grow][]"
+        ));
+
+        // Create search panel
+        JPanel searchPanel = createSearchPanel();
+        add(searchPanel, "wrap, growx");
+
+        // Create the toolbar with better styling
+        JToolBar toolBar = createToolBar();
+        add(toolBar, "wrap, growx");
+
+        // Create and configure the table with better styling
+        createTable();
+        JScrollPane scrollPane = new JScrollPane(employeeTable);
+        scrollPane.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createEmptyBorder(5, 0, 5, 0),
+            BorderFactory.createLineBorder(Color.GRAY)
+        ));
+        add(scrollPane, "grow, wrap");
+
+        // Add status bar
+        JPanel statusBar = createStatusBar();
+        add(statusBar, "growx");
+
+        // Initial load of data
+        refreshEmployeeList();
+    }
+
+    private JPanel createSearchPanel() {
+        JPanel panel = new JPanel(new MigLayout("fillx, insets 0", "[][][grow][]"));
+        
+        JLabel searchLabel = new JLabel("Search:");
+        JTextField searchField = new JTextField(20);
+        JComboBox<String> searchType = new JComboBox<>(new String[]{"Name", "ID", "Department", "Job Title"});
+        JButton searchButton = new JButton("Search");
+
+        panel.add(searchLabel);
+        panel.add(searchType);
+        panel.add(searchField, "growx");
+        panel.add(searchButton);
+
+        searchButton.addActionListener(e -> performSearch(searchField.getText(), (String)searchType.getSelectedItem()));
+        searchField.addActionListener(e -> performSearch(searchField.getText(), (String)searchType.getSelectedItem()));
+
+        return panel;
+    }
+
+    private JToolBar createToolBar() {
+        JToolBar toolBar = new JToolBar();
+        toolBar.setFloatable(false);
+        toolBar.setOpaque(false);
+        toolBar.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+
+        // Create buttons with icons and tooltips
+        JButton addButton = new JButton("Add Employee");
+        addButton.setToolTipText("Add a new employee");
+        
+        JButton editButton = new JButton("Edit");
+        editButton.setToolTipText("Edit selected employee");
+        
+        JButton deleteButton = new JButton("Delete");
+        deleteButton.setToolTipText("Delete selected employee");
+        
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.setToolTipText("Refresh employee list");
+
+        // Add buttons with spacing
+        toolBar.add(addButton);
+        toolBar.addSeparator(new Dimension(5, 0));
+        toolBar.add(editButton);
+        toolBar.addSeparator(new Dimension(5, 0));
+        toolBar.add(deleteButton);
+        toolBar.addSeparator(new Dimension(5, 0));
+        toolBar.add(refreshButton);
+
+        // Add action listeners
+        addButton.addActionListener(e -> showAddEmployeeDialog());
+        editButton.addActionListener(e -> showEditEmployeeDialog());
+        deleteButton.addActionListener(e -> deleteSelectedEmployee());
+        refreshButton.addActionListener(e -> refreshEmployeeList());
+
+        return toolBar;
+    }
+
+    private void createTable() {
+        String[] columnNames = {"ID", "Name", "Department", "Job Title", "Status", "Email", "Phone"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        employeeTable = new JTable(tableModel);
+        employeeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        employeeTable.getTableHeader().setReorderingAllowed(false);
+        employeeTable.setRowHeight(25);
+        employeeTable.setIntercellSpacing(new Dimension(10, 0));
+        employeeTable.setShowGrid(true);
+        employeeTable.setGridColor(Color.LIGHT_GRAY);
+
+        // Add better column sizing
+        employeeTable.getColumnModel().getColumn(0).setPreferredWidth(50);  // ID
+        employeeTable.getColumnModel().getColumn(1).setPreferredWidth(150); // Name
+        employeeTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Department
+        employeeTable.getColumnModel().getColumn(3).setPreferredWidth(150); // Job Title
+        employeeTable.getColumnModel().getColumn(4).setPreferredWidth(80);  // Status
+        employeeTable.getColumnModel().getColumn(5).setPreferredWidth(150); // Email
+        employeeTable.getColumnModel().getColumn(6).setPreferredWidth(100); // Phone
+    }
+
+    private JPanel createStatusBar() {
+        JPanel statusBar = new JPanel(new MigLayout("fillx, insets 2", "[grow][]"));
+        statusBar.setBorder(BorderFactory.createEtchedBorder());
+        
+        JLabel statusLabel = new JLabel("Ready");
+        JLabel recordCountLabel = new JLabel("0 records");
+        
+        statusBar.add(statusLabel, "grow");
+        statusBar.add(recordCountLabel);
+        
+        return statusBar;
+    }
+
+    private void performSearch(String searchText, String searchType) {
+        if (searchText == null || searchText.trim().isEmpty()) {
+            refreshEmployeeList();
+            return;
+        }
+
+        try {
+            List<EmployeeDTO> searchResults = switch (searchType) {
+                case "Name" -> employeeService.searchByName(searchText);
+                case "ID" -> employeeService.searchById(searchText);
+                case "Department" -> employeeService.searchByDepartment(searchText);
+                case "Job Title" -> employeeService.searchByJobTitle(searchText);
+                default -> employeeService.getAllEmployees();
+            };
+            updateTableData(searchResults);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                "Error performing search: " + e.getMessage(),
+                "Search Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void showAddEmployeeDialog() {
-        EmployeeDialog dialog = new EmployeeDialog(
-            (Frame) SwingUtilities.getWindowAncestor(this),
-            "Add Employee",
-            null
-        );
+        EmployeeDialog dialog = new EmployeeDialog(employeeService, departmentService);
+        dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
-        
+
         if (dialog.isApproved()) {
+            refreshEmployeeList();
+        }
+    }
+
+    private void showEditEmployeeDialog() {
+        int selectedRow = employeeTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select an employee to edit",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        EmployeeDTO employee = employees.get(selectedRow);
+        EmployeeDialog dialog = new EmployeeDialog(employeeService, departmentService);
+        dialog.setEmployee(employee);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+
+        if (dialog.isApproved()) {
+            refreshEmployeeList();
+        }
+    }
+
+    private void deleteSelectedEmployee() {
+        int selectedRow = employeeTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select an employee to delete",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        EmployeeDTO employee = employees.get(selectedRow);
+        DeleteConfirmationDialog dialog = new DeleteConfirmationDialog(
+            (Frame) SwingUtilities.getWindowAncestor(this),
+            employee.getFullName());
+
+        dialog.setVisible(true);
+
+        if (dialog.isConfirmed()) {
             try {
-                EmployeeDTO newEmployee = dialog.getEmployee();
-                employeeService.createEmployee(newEmployee);
-                loadEmployeeData();
-            } catch (IOException ex) {
+                employeeService.deleteEmployee(employee.getId());
+                refreshEmployeeList();
                 JOptionPane.showMessageDialog(this,
-                    "Error creating employee: " + ex.getMessage(),
+                    "Employee deleted successfully",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                    "Error deleting employee: " + e.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
-    private void showEditEmployeeDialog(String employeeId) {
+    private void refreshEmployeeList() {
         try {
-            EmployeeDTO employee = employeeService.getEmployee(employeeId);
-            EmployeeDialog dialog = new EmployeeDialog(
-                (Frame) SwingUtilities.getWindowAncestor(this),
-                "Edit Employee",
-                employee
-            );
-            dialog.setVisible(true);
-            
-            if (dialog.isApproved()) {
-                employeeService.updateEmployee(employeeId, dialog.getEmployee());
-                loadEmployeeData();
-            }
-        } catch (IOException ex) {
+            employees = employeeService.findEmployees(null, null, null, null, null, null, null);
+            updateTableData(employees);
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                "Error editing employee: " + ex.getMessage(),
+                "Error loading employees: " + e.getMessage(),
                 "Error",
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void deleteEmployee(String employeeId) {
-        try {
-            EmployeeDTO employee = employeeService.getEmployee(employeeId);
-            DeleteConfirmationDialog dialog = new DeleteConfirmationDialog(
-                (Frame) SwingUtilities.getWindowAncestor(this),
-                "employee",
-                employee.getName()
-            );
-            dialog.setVisible(true);
-            
-            if (dialog.isConfirmed()) {
-                employeeService.deleteEmployee(employeeId);
-                loadEmployeeData();
-            }
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
-                "Error deleting employee: " + ex.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void performSearch() {
-        String searchTerm = searchField.getText();
-        try {
-            List<EmployeeDTO> employees = employeeService.searchEmployees(searchTerm);
-            updateTableData(employees);
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
-                "Error searching employees: " + ex.getMessage(),
-                "Search Error",
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void applyFilters() {
-        String department = (String) departmentFilter.getSelectedItem();
-        EmploymentStatus status = (EmploymentStatus) statusFilter.getSelectedItem();
-        
-        try {
-            List<EmployeeDTO> employees;
-            if (!"All Departments".equals(department)) {
-                employees = employeeService.getEmployeesByDepartment(1L); // TODO: Get actual department ID
-            } else if (status != null) {
-                employees = employeeService.getEmployeesByStatus(status.name());
-            } else {
-                employees = employeeService.getAllEmployees();
-            }
-            updateTableData(employees);
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
-                "Error applying filters: " + ex.getMessage(),
-                "Filter Error",
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void loadEmployeeData() {
-        try {
-            List<EmployeeDTO> employees = employeeService.getAllEmployees();
-            updateTableData(employees);
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
-                "Error loading employees: " + ex.getMessage(),
-                "Load Error",
                 JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -220,30 +261,14 @@ public class EmployeePanel extends JPanel {
         tableModel.setRowCount(0);
         for (EmployeeDTO employee : employees) {
             tableModel.addRow(new Object[]{
-                employee.getEmployeeId(),
-                employee.getName(),
-                employee.getDepartment().getName(),
+                employee.getId(),
+                employee.getFullName(),
+                employee.getDepartmentName(),
                 employee.getJobTitle(),
-                employee.getStatus(),
-                employee.getHireDate(),
+                employee.getEmploymentStatus(),
                 employee.getEmail(),
-                "Edit/Delete"
+                employee.getPhone()
             });
         }
-    }
-
-    private void showTableActionPopup(Component component, int x, int y, String employeeId) {
-        JPopupMenu popup = new JPopupMenu();
-        
-        JMenuItem editItem = new JMenuItem("Edit");
-        editItem.addActionListener(e -> showEditEmployeeDialog(employeeId));
-        
-        JMenuItem deleteItem = new JMenuItem("Delete");
-        deleteItem.addActionListener(e -> deleteEmployee(employeeId));
-        
-        popup.add(editItem);
-        popup.add(deleteItem);
-        
-        popup.show(component, x, y);
     }
 }

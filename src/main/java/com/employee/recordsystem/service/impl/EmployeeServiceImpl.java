@@ -1,23 +1,27 @@
 package com.employee.recordsystem.service.impl;
 
 import com.employee.recordsystem.dto.EmployeeDTO;
-import com.employee.recordsystem.model.Employee;
 import com.employee.recordsystem.model.Department;
+import com.employee.recordsystem.model.Employee;
 import com.employee.recordsystem.model.EmploymentStatus;
-import com.employee.recordsystem.repository.EmployeeRepository;
 import com.employee.recordsystem.repository.DepartmentRepository;
-import com.employee.recordsystem.service.EmployeeService;
+import com.employee.recordsystem.repository.EmployeeRepository;
 import com.employee.recordsystem.service.AuditService;
+import com.employee.recordsystem.service.EmployeeService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import javax.persistence.EntityNotFoundException;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class EmployeeServiceImpl implements EmployeeService {
     
     private final EmployeeRepository employeeRepository;
@@ -25,105 +29,126 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final AuditService auditService;
 
     @Override
-    @Transactional
     public EmployeeDTO createEmployee(EmployeeDTO employeeDTO) {
         if (employeeRepository.existsByEmployeeId(employeeDTO.getEmployeeId())) {
             throw new IllegalArgumentException("Employee ID already exists");
         }
 
-        Employee employee = convertToEntity(employeeDTO);
-        Employee savedEmployee = employeeRepository.save(employee);
-        auditService.logAction("EMPLOYEE", savedEmployee.getId(), "CREATE", "Employee created");
+        Employee employee = mapToEntity(employeeDTO);
+        employee = employeeRepository.save(employee);
+        auditService.logAction("Employee", employee.getId(), "CREATE", "Created new employee");
         
-        return convertToDTO(savedEmployee);
+        return mapToDTO(employee);
     }
 
     @Override
-    @Transactional
-    public EmployeeDTO updateEmployee(String employeeId, EmployeeDTO employeeDTO) {
-        Employee employee = employeeRepository.findByEmployeeId(employeeId)
+    public EmployeeDTO updateEmployee(Long id, EmployeeDTO employeeDTO) {
+        Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-        
+
         updateEmployeeFields(employee, employeeDTO);
-        Employee updatedEmployee = employeeRepository.save(employee);
-        auditService.logAction("EMPLOYEE", updatedEmployee.getId(), "UPDATE", "Employee updated");
-        
-        return convertToDTO(updatedEmployee);
+        employee = employeeRepository.save(employee);
+        auditService.logAction("Employee", employee.getId(), "UPDATE", "Updated employee details");
+
+        return mapToDTO(employee);
     }
 
     @Override
-    @Transactional
-    public void deleteEmployee(String employeeId) {
-        Employee employee = employeeRepository.findByEmployeeId(employeeId)
+    public void deleteEmployee(Long id) {
+        Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-        
+            
         employeeRepository.delete(employee);
-        auditService.logAction("EMPLOYEE", employee.getId(), "DELETE", "Employee deleted");
+        auditService.logAction("Employee", id, "DELETE", "Deleted employee");
     }
 
     @Override
-    public EmployeeDTO getEmployeeById(String employeeId) {
-        return employeeRepository.findByEmployeeId(employeeId)
-            .map(this::convertToDTO)
+    public EmployeeDTO getEmployeeById(Long id) {
+        return employeeRepository.findById(id)
+            .map(this::mapToDTO)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
     }
 
     @Override
-    public List<EmployeeDTO> getAllEmployees() {
+    public List<EmployeeDTO> findEmployees(String name, String employeeId, Long departmentId, 
+            String jobTitle, EmploymentStatus status, LocalDate hireDateFrom, LocalDate hireDateTo) {
+        // Implementation of search with criteria
         return employeeRepository.findAll().stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<EmployeeDTO> searchEmployees(String searchTerm) {
-        return employeeRepository.searchEmployees(searchTerm).stream()
-            .map(this::convertToDTO)
+            .filter(employee -> matchesSearchCriteria(employee, name, employeeId, departmentId, 
+                jobTitle, status, hireDateFrom, hireDateTo))
+            .map(this::mapToDTO)
             .collect(Collectors.toList());
     }
 
     @Override
     public List<EmployeeDTO> getEmployeesByDepartment(Long departmentId) {
-        return employeeRepository.findByDepartmentId(departmentId).stream()
-            .map(this::convertToDTO)
+        Department department = departmentRepository.findById(departmentId)
+            .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+        
+        return employeeRepository.findByDepartment(department).stream()
+            .map(this::mapToDTO)
             .collect(Collectors.toList());
     }
 
     @Override
-    public List<EmployeeDTO> getEmployeesByStatus(EmploymentStatus status) {
-        return employeeRepository.findByEmploymentStatus(status).stream()
-            .map(this::convertToDTO)
+    public List<EmployeeDTO> searchEmployees(String query, Long departmentId, EmploymentStatus status) {
+        List<Employee> employees = employeeRepository.findAll();
+        
+        return employees.stream()
+            .filter(employee -> matchesSearchQuery(employee, query, departmentId, status))
+            .map(this::mapToDTO)
             .collect(Collectors.toList());
     }
 
     @Override
-    public List<EmployeeDTO> getEmployeesByHireDateRange(LocalDate startDate, LocalDate endDate) {
-        return employeeRepository.findByHireDateBetween(startDate, endDate).stream()
-            .map(this::convertToDTO)
+    public List<EmployeeDTO> searchByName(String name) {
+        return employeeRepository.findByFullNameContainingIgnoreCase(name)
+            .stream()
+            .map(this::mapToDTO)
             .collect(Collectors.toList());
     }
 
     @Override
-    public boolean isEmployeeIdUnique(String employeeId) {
-        return !employeeRepository.existsByEmployeeId(employeeId);
+    public List<EmployeeDTO> searchById(String employeeId) {
+        return employeeRepository.findByEmployeeIdContainingIgnoreCase(employeeId)
+            .stream()
+            .map(this::mapToDTO)
+            .collect(Collectors.toList());
     }
 
-    private Employee convertToEntity(EmployeeDTO dto) {
-        Employee employee = new Employee();
-        updateEmployeeFields(employee, dto);
-        return employee;
+    @Override
+    public List<EmployeeDTO> searchByDepartment(String departmentName) {
+        return employeeRepository.findByDepartment_NameContainingIgnoreCase(departmentName)
+            .stream()
+            .map(this::mapToDTO)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EmployeeDTO> searchByJobTitle(String jobTitle) {
+        return employeeRepository.findByJobTitleContainingIgnoreCase(jobTitle)
+            .stream()
+            .map(this::mapToDTO)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EmployeeDTO> getAllEmployees() {
+        return employeeRepository.findAll()
+            .stream()
+            .map(this::mapToDTO)
+            .collect(Collectors.toList());
     }
 
     private void updateEmployeeFields(Employee employee, EmployeeDTO dto) {
-        employee.setEmployeeId(dto.getEmployeeId());
         employee.setFullName(dto.getFullName());
         employee.setJobTitle(dto.getJobTitle());
-        employee.setHireDate(dto.getHireDate());
-        employee.setEmploymentStatus(dto.getEmploymentStatus());
         employee.setEmail(dto.getEmail());
         employee.setPhone(dto.getPhone());
         employee.setAddress(dto.getAddress());
-
+        employee.setEmploymentStatus(dto.getEmploymentStatus());
+        employee.setHireDate(convertToDateTime(dto.getHireDate()));
+        
         if (dto.getDepartmentId() != null) {
             Department department = departmentRepository.findById(dto.getDepartmentId())
                 .orElseThrow(() -> new EntityNotFoundException("Department not found"));
@@ -131,17 +156,37 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
     }
 
-    private EmployeeDTO convertToDTO(Employee employee) {
+    private Employee mapToEntity(EmployeeDTO dto) {
+        Employee employee = new Employee();
+        employee.setEmployeeId(dto.getEmployeeId());
+        employee.setFullName(dto.getFullName());
+        employee.setJobTitle(dto.getJobTitle());
+        employee.setEmail(dto.getEmail());
+        employee.setPhone(dto.getPhone());
+        employee.setAddress(dto.getAddress());
+        employee.setEmploymentStatus(dto.getEmploymentStatus());
+        employee.setHireDate(convertToDateTime(dto.getHireDate()));
+        
+        if (dto.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(dto.getDepartmentId())
+                .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+            employee.setDepartment(department);
+        }
+        
+        return employee;
+    }
+
+    private EmployeeDTO mapToDTO(Employee employee) {
         EmployeeDTO dto = new EmployeeDTO();
         dto.setId(employee.getId());
         dto.setEmployeeId(employee.getEmployeeId());
         dto.setFullName(employee.getFullName());
         dto.setJobTitle(employee.getJobTitle());
-        dto.setHireDate(employee.getHireDate());
-        dto.setEmploymentStatus(employee.getEmploymentStatus());
         dto.setEmail(employee.getEmail());
         dto.setPhone(employee.getPhone());
         dto.setAddress(employee.getAddress());
+        dto.setEmploymentStatus(employee.getEmploymentStatus());
+        dto.setHireDate(convertToDate(employee.getHireDate()));
         
         if (employee.getDepartment() != null) {
             dto.setDepartmentId(employee.getDepartment().getId());
@@ -149,5 +194,44 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         
         return dto;
+    }
+
+    // Helper methods for date conversion
+    private LocalDateTime convertToDateTime(LocalDate date) {
+        return date != null ? date.atStartOfDay() : null;
+    }
+
+    private LocalDate convertToDate(LocalDateTime dateTime) {
+        return dateTime != null ? dateTime.toLocalDate() : null;
+    }
+
+    private boolean matchesSearchCriteria(Employee employee, String name, String employeeId,
+            Long departmentId, String jobTitle, EmploymentStatus status, 
+            LocalDate hireDateFrom, LocalDate hireDateTo) {
+        
+        LocalDateTime hireDateTime = employee.getHireDate();
+        LocalDate hireDate = hireDateTime != null ? hireDateTime.toLocalDate() : null;
+        
+        return (name == null || employee.getFullName().toLowerCase().contains(name.toLowerCase())) &&
+               (employeeId == null || employee.getEmployeeId().toLowerCase().contains(employeeId.toLowerCase())) &&
+               (departmentId == null || employee.getDepartment().getId().equals(departmentId)) &&
+               (jobTitle == null || employee.getJobTitle().toLowerCase().contains(jobTitle.toLowerCase())) &&
+               (status == null || employee.getEmploymentStatus() == status) &&
+               (hireDateFrom == null || (hireDate != null && !hireDate.isBefore(hireDateFrom))) &&
+               (hireDateTo == null || (hireDate != null && !hireDate.isAfter(hireDateTo)));
+    }
+
+    private boolean matchesSearchQuery(Employee employee, String query, Long departmentId, EmploymentStatus status) {
+        boolean matchesQuery = query == null || 
+            employee.getFullName().toLowerCase().contains(query.toLowerCase()) ||
+            employee.getEmployeeId().toLowerCase().contains(query.toLowerCase()) ||
+            employee.getJobTitle().toLowerCase().contains(query.toLowerCase());
+            
+        boolean matchesDepartment = departmentId == null || 
+            (employee.getDepartment() != null && employee.getDepartment().getId().equals(departmentId));
+            
+        boolean matchesStatus = status == null || employee.getEmploymentStatus() == status;
+        
+        return matchesQuery && matchesDepartment && matchesStatus;
     }
 }

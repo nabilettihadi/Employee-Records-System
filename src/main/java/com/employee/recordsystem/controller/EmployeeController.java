@@ -3,91 +3,86 @@ package com.employee.recordsystem.controller;
 import com.employee.recordsystem.dto.EmployeeDTO;
 import com.employee.recordsystem.model.EmploymentStatus;
 import com.employee.recordsystem.service.EmployeeService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/employees")
+@RequestMapping("/api/v1/employees")
 @RequiredArgsConstructor
-@Api(tags = "Employee Management")
+@Tag(name = "Employees", description = "Employee management APIs")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
 
+    @GetMapping
+    @PreAuthorize("hasAnyRole('HR', 'ADMIN', 'MANAGER')")
+    @Operation(summary = "Get all employees", description = "Retrieve all employees with optional filtering")
+    public ResponseEntity<List<EmployeeDTO>> getAllEmployees(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String employeeId,
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) String jobTitle,
+            @RequestParam(required = false) EmploymentStatus status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hireDateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hireDateTo) {
+        return ResponseEntity.ok(employeeService.findEmployees(name, employeeId, departmentId, 
+            jobTitle, status, hireDateFrom, hireDateTo));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('HR', 'ADMIN', 'MANAGER')")
+    @Operation(summary = "Get employee by ID", description = "Retrieve an employee by their ID")
+    public ResponseEntity<EmployeeDTO> getEmployee(@PathVariable Long id) {
+        return ResponseEntity.ok(employeeService.getEmployeeById(id));
+    }
+
     @PostMapping
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
-    @ApiOperation("Create a new employee")
+    @PreAuthorize("hasRole('HR')")
+    @Operation(summary = "Create employee", description = "Create a new employee record")
     public ResponseEntity<EmployeeDTO> createEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) {
         return ResponseEntity.ok(employeeService.createEmployee(employeeDTO));
     }
 
-    @PutMapping("/{employeeId}")
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN') or @securityService.isEmployeeManager(#employeeId)")
-    @ApiOperation("Update an existing employee")
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('HR', 'MANAGER')")
+    @Operation(summary = "Update employee", description = "Update an existing employee record")
     public ResponseEntity<EmployeeDTO> updateEmployee(
-            @PathVariable String employeeId,
+            @PathVariable Long id,
             @Valid @RequestBody EmployeeDTO employeeDTO) {
-        return ResponseEntity.ok(employeeService.updateEmployee(employeeId, employeeDTO));
+        return ResponseEntity.ok(employeeService.updateEmployee(id, employeeDTO));
     }
 
-    @DeleteMapping("/{employeeId}")
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
-    @ApiOperation("Delete an employee")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable String employeeId) {
-        employeeService.deleteEmployee(employeeId);
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
+    @Operation(summary = "Delete employee", description = "Delete an employee record")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteEmployee(id);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{employeeId}")
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN') or @securityService.isEmployeeManager(#employeeId)")
-    @ApiOperation("Get employee by ID")
-    public ResponseEntity<EmployeeDTO> getEmployee(@PathVariable String employeeId) {
-        return ResponseEntity.ok(employeeService.getEmployeeById(employeeId));
-    }
-
-    @GetMapping
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
-    @ApiOperation("Get all employees")
-    public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
-        return ResponseEntity.ok(employeeService.getAllEmployees());
-    }
-
     @GetMapping("/search")
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN') or hasRole('MANAGER')")
-    @ApiOperation("Search employees")
-    public ResponseEntity<List<EmployeeDTO>> searchEmployees(@RequestParam String searchTerm) {
-        return ResponseEntity.ok(employeeService.searchEmployees(searchTerm));
+    @PreAuthorize("hasAnyRole('HR', 'ADMIN', 'MANAGER')")
+    @Operation(summary = "Search employees", description = "Search employees by various criteria")
+    public ResponseEntity<List<EmployeeDTO>> searchEmployees(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) EmploymentStatus status) {
+        return ResponseEntity.ok(employeeService.searchEmployees(query, departmentId, status));
     }
 
     @GetMapping("/department/{departmentId}")
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN') or @securityService.isManagerOfDepartment(#departmentId)")
-    @ApiOperation("Get employees by department")
+    @PreAuthorize("hasAnyRole('HR', 'ADMIN', 'MANAGER')")
+    @Operation(summary = "Get employees by department", description = "Retrieve all employees in a specific department")
     public ResponseEntity<List<EmployeeDTO>> getEmployeesByDepartment(@PathVariable Long departmentId) {
         return ResponseEntity.ok(employeeService.getEmployeesByDepartment(departmentId));
-    }
-
-    @GetMapping("/status/{status}")
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
-    @ApiOperation("Get employees by status")
-    public ResponseEntity<List<EmployeeDTO>> getEmployeesByStatus(@PathVariable EmploymentStatus status) {
-        return ResponseEntity.ok(employeeService.getEmployeesByStatus(status));
-    }
-
-    @GetMapping("/hired-between")
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
-    @ApiOperation("Get employees hired between dates")
-    public ResponseEntity<List<EmployeeDTO>> getEmployeesByHireDateRange(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        return ResponseEntity.ok(employeeService.getEmployeesByHireDateRange(startDate, endDate));
     }
 }

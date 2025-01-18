@@ -8,15 +8,16 @@ import com.employee.recordsystem.repository.DepartmentRepository;
 import com.employee.recordsystem.repository.EmployeeRepository;
 import com.employee.recordsystem.service.DepartmentService;
 import com.employee.recordsystem.service.AuditService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
@@ -24,7 +25,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     private final AuditService auditService;
 
     @Override
-    @Transactional
     public DepartmentDTO createDepartment(DepartmentDTO departmentDTO) {
         if (departmentRepository.existsByName(departmentDTO.getName())) {
             throw new IllegalArgumentException("Department name already exists");
@@ -38,7 +38,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    @Transactional
     public DepartmentDTO updateDepartment(Long id, DepartmentDTO departmentDTO) {
         Department department = departmentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
@@ -56,7 +55,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    @Transactional
     public void deleteDepartment(Long id) {
         Department department = departmentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
@@ -80,7 +78,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    @Transactional
     public DepartmentDTO assignManager(Long departmentId, String employeeId) {
         Department department = departmentRepository.findById(departmentId)
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));

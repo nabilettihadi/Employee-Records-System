@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  oracle:
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    environment:
+      - ORACLE_PWD=password
+      - ORACLE_CHARACTERSET=AL32UTF8
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+      - ./src/main/resources/db/init:/docker-entrypoint-initdb.d/setup
+    healthcheck:
+      test: ["CMD", "sqlplus", "-L", "system/password@//localhost:1521/XE", "AS", "SYSDBA"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle:1521:XE
+      - SPRING_DATASOURCE_USERNAME=system
+      - SPRING_DATASOURCE_PASSWORD=password
+      - JWT_SECRET=9a4f2c8d3b7a1e6f45c8a0b3f267d8b1d4e6f3c8a9d2b5f8e3a7c4d9f6b2e5a
+      - JWT_EXPIRATION=86400000
+    depends_on:
+      oracle:
+        condition: service_healthy
+
+volumes:
+  oracle_data:

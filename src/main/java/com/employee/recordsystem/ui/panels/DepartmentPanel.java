@@ -1,133 +1,234 @@
 package com.employee.recordsystem.ui.panels;
 
 import com.employee.recordsystem.dto.DepartmentDTO;
-import com.employee.recordsystem.ui.service.DepartmentService;
-import net.miginfocom.swing.MigLayout;
+import com.employee.recordsystem.service.DepartmentService;
+import com.employee.recordsystem.ui.dialogs.DeleteConfirmationDialog;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.IOException;
 import java.util.List;
 
+@Component
+@RequiredArgsConstructor
 public class DepartmentPanel extends JPanel {
-    
-    private final JTable departmentTable;
-    private final DefaultTableModel tableModel;
     private final DepartmentService departmentService;
+    private JTable departmentTable;
+    private DefaultTableModel tableModel;
+    private List<DepartmentDTO> departments;
 
-    public DepartmentPanel() {
-        setLayout(new MigLayout("fill", "[grow]", "[]10[]10[grow]"));
-        this.departmentService = new DepartmentService();
-        
-        // Create toolbar panel
-        JPanel toolbarPanel = new JPanel(new MigLayout("fillx", "[]push[]", "[]"));
-        
-        // Add button
-        JButton addButton = new JButton("Add Department");
-        addButton.setBackground(new Color(0, 120, 215));
-        addButton.setForeground(Color.WHITE);
-        
-        toolbarPanel.add(addButton);
-        
-        // Create table
-        String[] columns = {
-            "ID", "Name", "Manager", "Employee Count", 
-            "Location", "Created Date", "Actions"
-        };
-        tableModel = new DefaultTableModel(columns, 0) {
+    public void initializeUI() {
+        setLayout(new BorderLayout());
+
+        // Create the table model
+        String[] columnNames = {"ID", "Name", "Description", "Location", "Manager", "Employee Count"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == columns.length - 1; // Only actions column is editable
+                return false;
             }
         };
-        departmentTable = new JTable(tableModel);
-        departmentTable.setFillsViewportHeight(true);
-        
-        // Style table
-        departmentTable.setRowHeight(30);
-        departmentTable.getTableHeader().setBackground(new Color(240, 240, 240));
-        departmentTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
-        
-        // Add components to main panel
-        add(createTitlePanel(), "growx, wrap");
-        add(toolbarPanel, "growx, wrap");
-        add(new JScrollPane(departmentTable), "grow");
-        
-        // Add listeners
-        addButton.addActionListener(e -> showAddDepartmentDialog());
-        
-        // Load initial data
-        loadDepartmentData();
-    }
 
-    private JPanel createTitlePanel() {
-        JPanel titlePanel = new JPanel(new MigLayout("fillx", "[]push[]", "[]"));
-        JLabel titleLabel = new JLabel("Department Management");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titlePanel.add(titleLabel);
-        return titlePanel;
+        // Create and configure the table
+        departmentTable = new JTable(tableModel);
+        departmentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        departmentTable.getTableHeader().setReorderingAllowed(false);
+
+        // Create the toolbar
+        JToolBar toolBar = new JToolBar();
+        toolBar.setFloatable(false);
+
+        // Add buttons
+        JButton addButton = new JButton("Add Department");
+        JButton editButton = new JButton("Edit");
+        JButton deleteButton = new JButton("Delete");
+        JButton refreshButton = new JButton("Refresh");
+
+        toolBar.add(addButton);
+        toolBar.add(editButton);
+        toolBar.add(deleteButton);
+        toolBar.add(refreshButton);
+
+        // Add action listeners
+        addButton.addActionListener(e -> showAddDepartmentDialog());
+        editButton.addActionListener(e -> showEditDepartmentDialog());
+        deleteButton.addActionListener(e -> deleteSelectedDepartment());
+        refreshButton.addActionListener(e -> refreshDepartmentList());
+
+        // Add components to panel
+        add(toolBar, BorderLayout.NORTH);
+        add(new JScrollPane(departmentTable), BorderLayout.CENTER);
+
+        // Initial load of data
+        refreshDepartmentList();
     }
 
     private void showAddDepartmentDialog() {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Add Department", true);
-        dialog.setLayout(new MigLayout("fillx", "[][]", "[]10[]10[]"));
-        
-        JTextField nameField = new JTextField(20);
-        JTextField locationField = new JTextField(20);
-        
-        dialog.add(new JLabel("Name:"), "right");
-        dialog.add(nameField, "growx, wrap");
-        dialog.add(new JLabel("Location:"), "right");
-        dialog.add(locationField, "growx, wrap");
-        
-        JButton saveButton = new JButton("Save");
-        saveButton.addActionListener(e -> {
+        DepartmentDTO newDepartment = new DepartmentDTO();
+        if (showDepartmentDialog(newDepartment, true)) {
             try {
-                DepartmentDTO newDepartment = new DepartmentDTO();
-                newDepartment.setName(nameField.getText());
-                newDepartment.setLocation(locationField.getText());
-                
                 departmentService.createDepartment(newDepartment);
-                loadDepartmentData();
-                dialog.dispose();
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(dialog,
-                    "Error creating department: " + ex.getMessage(),
+                refreshDepartmentList();
+                JOptionPane.showMessageDialog(this,
+                    "Department created successfully",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                    "Error creating department: " + e.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    private void showEditDepartmentDialog() {
+        int selectedRow = departmentTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a department to edit",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        DepartmentDTO department = departments.get(selectedRow);
+        if (showDepartmentDialog(department, false)) {
+            try {
+                departmentService.updateDepartment(department.getId(), department);
+                refreshDepartmentList();
+                JOptionPane.showMessageDialog(this,
+                    "Department updated successfully",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                    "Error updating department: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void deleteSelectedDepartment() {
+        int selectedRow = departmentTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a department to delete",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        DepartmentDTO department = departments.get(selectedRow);
+        DeleteConfirmationDialog dialog = new DeleteConfirmationDialog(
+            (Frame) SwingUtilities.getWindowAncestor(this),
+            department.getName());
+
+        dialog.setVisible(true);
+
+        if (dialog.isConfirmed()) {
+            try {
+                departmentService.deleteDepartment(department.getId());
+                refreshDepartmentList();
+                JOptionPane.showMessageDialog(this,
+                    "Department deleted successfully",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                    "Error deleting department: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private boolean showDepartmentDialog(DepartmentDTO department, boolean isNew) {
+        // Create dialog
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
+            isNew ? "Add Department" : "Edit Department",
+            true);
+        dialog.setLayout(new BorderLayout(10, 10));
+
+        // Create form panel
+        JPanel formPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        JTextField nameField = new JTextField(department.getName());
+        JTextField descriptionField = new JTextField(department.getDescription());
+        JTextField locationField = new JTextField(department.getLocation());
+
+        formPanel.add(new JLabel("Name:"));
+        formPanel.add(nameField);
+        formPanel.add(new JLabel("Description:"));
+        formPanel.add(descriptionField);
+        formPanel.add(new JLabel("Location:"));
+        formPanel.add(locationField);
+
+        // Create button panel
+        JPanel buttonPanel = new JPanel();
+        JButton saveButton = new JButton("Save");
+        JButton cancelButton = new JButton("Cancel");
+
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+
+        // Add panels to dialog
+        dialog.add(formPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Add button actions
+        final boolean[] result = {false};
+
+        saveButton.addActionListener(e -> {
+            if (nameField.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(dialog,
+                    "Department name is required",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            department.setName(nameField.getText().trim());
+            department.setDescription(descriptionField.getText().trim());
+            department.setLocation(locationField.getText().trim());
+            result[0] = true;
+            dialog.dispose();
         });
-        
-        dialog.add(saveButton, "span 2, center");
-        
+
+        cancelButton.addActionListener(e -> dialog.dispose());
+
+        // Show dialog
         dialog.pack();
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
+
+        return result[0];
     }
 
-    private void loadDepartmentData() {
+    private void refreshDepartmentList() {
         try {
-            List<DepartmentDTO> departments = departmentService.getAllDepartments();
-            updateTableData(departments);
-        } catch (IOException ex) {
+            departments = departmentService.getAllDepartments();
+            updateTableModel();
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                "Error loading departments: " + ex.getMessage(),
-                "Load Error",
+                "Error loading departments: " + e.getMessage(),
+                "Error",
                 JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void updateTableData(List<DepartmentDTO> departments) {
+    private void updateTableModel() {
         tableModel.setRowCount(0);
         for (DepartmentDTO department : departments) {
             tableModel.addRow(new Object[]{
                 department.getId(),
                 department.getName(),
-                department.getManager() != null ? department.getManager().getName() : "Not Assigned",
-                department.getEmployeeCount(),
+                department.getDescription(),
                 department.getLocation(),
-                department.getCreatedDate(),
-                "Edit/Delete"
+                department.getManagerName(),
+                department.getEmployeeCount()
             });
         }
     }

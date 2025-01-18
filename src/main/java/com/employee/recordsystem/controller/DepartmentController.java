@@ -2,34 +2,48 @@ package com.employee.recordsystem.controller;
 
 import com.employee.recordsystem.dto.DepartmentDTO;
 import com.employee.recordsystem.service.DepartmentService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/departments")
+@RequestMapping("/api/v1/departments")
 @RequiredArgsConstructor
-@Api(tags = "Department Management")
+@Tag(name = "Departments", description = "Department management APIs")
 public class DepartmentController {
 
     private final DepartmentService departmentService;
 
+    @GetMapping
+    @PreAuthorize("hasAnyRole('HR', 'ADMIN', 'MANAGER')")
+    @Operation(summary = "Get all departments", description = "Retrieve all departments")
+    public ResponseEntity<List<DepartmentDTO>> getAllDepartments() {
+        return ResponseEntity.ok(departmentService.getAllDepartments());
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('HR', 'ADMIN', 'MANAGER')")
+    @Operation(summary = "Get department by ID", description = "Retrieve a department by its ID")
+    public ResponseEntity<DepartmentDTO> getDepartment(@PathVariable Long id) {
+        return ResponseEntity.ok(departmentService.getDepartmentById(id));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @ApiOperation("Create a new department")
+    @Operation(summary = "Create a new department", description = "Create a new department")
     public ResponseEntity<DepartmentDTO> createDepartment(@Valid @RequestBody DepartmentDTO departmentDTO) {
         return ResponseEntity.ok(departmentService.createDepartment(departmentDTO));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @ApiOperation("Update an existing department")
+    @Operation(summary = "Update an existing department", description = "Update an existing department")
     public ResponseEntity<DepartmentDTO> updateDepartment(
             @PathVariable Long id,
             @Valid @RequestBody DepartmentDTO departmentDTO) {
@@ -38,29 +52,15 @@ public class DepartmentController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @ApiOperation("Delete a department")
+    @Operation(summary = "Delete a department", description = "Delete a department")
     public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('HR', 'ADMIN', 'MANAGER')")
-    @ApiOperation("Get department by ID")
-    public ResponseEntity<DepartmentDTO> getDepartment(@PathVariable Long id) {
-        return ResponseEntity.ok(departmentService.getDepartmentById(id));
-    }
-
-    @GetMapping
-    @PreAuthorize("hasAnyRole('HR', 'ADMIN', 'MANAGER')")
-    @ApiOperation("Get all departments")
-    public ResponseEntity<List<DepartmentDTO>> getAllDepartments() {
-        return ResponseEntity.ok(departmentService.getAllDepartments());
-    }
-
     @PutMapping("/{departmentId}/manager/{employeeId}")
     @PreAuthorize("hasRole('ADMIN')")
-    @ApiOperation("Assign manager to department")
+    @Operation(summary = "Assign manager to department", description = "Assign a manager to a department")
     public ResponseEntity<DepartmentDTO> assignManager(
             @PathVariable Long departmentId,
             @PathVariable String employeeId) {

@@ -1,9 +1,9 @@
 package com.employee.recordsystem.model;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data

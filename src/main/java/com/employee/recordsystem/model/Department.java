@@ -1,15 +1,12 @@
 package com.employee.recordsystem.model;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.util.Set;
+import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "departments")
 public class Department {
@@ -23,7 +20,7 @@ public class Department {
     private String name;
 
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL)
-    private Set<Employee> employees;
+    private List<Employee> employees;
 
     @ManyToOne
     @JoinColumn(name = "manager_id")

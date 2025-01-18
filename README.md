@@ -1,74 +1,111 @@
 # Employee Records Management System
 
 ## Description
-A comprehensive Employee Records Management System built with Java 17, Spring Boot, and Oracle SQL. The system provides a Swing-based desktop interface for managing employee data with different user roles and permissions.
+A comprehensive Employee Records Management System built with Java 22, Spring Boot, and Oracle SQL. The system provides a Swing-based desktop interface for managing employee data with different user roles and permissions.
 
 ## Features
-- Employee Data Management (CRUD operations)
+
+### Employee Data Management
+- Full Name
+- Employee ID
+- Job Title
+- Department
+- Hire Date
+- Employment Status
+- Contact Information
+- Address
+
+### User Roles and Permissions
+- **HR Personnel**: Full CRUD operations on all employee data
+- **Managers**: Limited update access for employees in their department
+- **Administrators**: Full system access, including configuration settings
+
+### Security Features
+- JWT-based Authentication
 - Role-based Access Control
-- Audit Trail
+- Password Encryption
+- Session Management
+
+### Additional Features
+- Audit Trail for all data changes
 - Advanced Search and Filtering
 - Data Validation
-- Reporting Capabilities
+- Basic Reporting
+- Swagger API Documentation
 
 ## Technical Stack
-- Java 17
-- Spring Boot
-- Oracle SQL Database
+- Java 22
+- Spring Boot 3.2
+- Oracle Database 21c
+- Spring Security with JWT
 - Swing UI with MigLayout
-- Docker
-- JUnit & Mockito for Testing
-- Swagger for API Documentation
+- Docker & Docker Compose
+- JUnit 5 & Mockito for Testing
+- OpenAPI/Swagger Documentation
 
 ## Prerequisites
-- JDK 17
-- Maven
-- Docker
-- Oracle Database
+- JDK 22
+- Maven 3.9+
+- Docker & Docker Compose
+- Oracle Database 21c
 
 ## Setup Instructions
 
-### Database Setup
-1. Install Oracle Database
-2. Create a new database user
-3. Update database credentials in `application.properties`
+### Using Docker (Recommended)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/employee-records-system.git
+   cd employee-records-system
+   ```
 
-### Building the Application
-```bash
-mvn clean install
-```
+2. Start the application with Docker Compose:
+   ```bash
+   docker-compose up
+   ```
 
-### Running with Docker
-```bash
-docker build -t employee-records-system .
-docker run -p 8080:8080 employee-records-system
-```
+   This will start:
+   - Oracle Database (accessible on port 1521)
+   - Application (accessible on port 8080)
 
-### Running Locally
-```bash
-mvn spring-boot:run
-```
+### Manual Setup
+1. Install Oracle Database 21c
+2. Update database credentials in `src/main/resources/application.yml`
+3. Build the application:
+   ```bash
+   mvn clean install
+   ```
+4. Run the application:
+   ```bash
+   mvn spring-boot:run
+   ```
 
 ## API Documentation
-Access Swagger UI at: http://localhost:8080/swagger-ui/
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- OpenAPI Docs: http://localhost:8080/v3/api-docs
+
+## Default Users
+The system comes with default users for testing:
+- Admin: username=admin, password=admin123
+- HR: username=hr, password=hr123
+- Manager: username=manager, password=manager123
 
 ## Testing
+Run unit tests:
 ```bash
 mvn test
 ```
 
-## Project Structure
+Run integration tests:
+```bash
+mvn verify
 ```
-src/
-├── main/
-│   ├── java/
-│   │   └── com/employee/recordsystem/
-│   │       ├── config/
-│   │       ├── controller/
-│   │       ├── model/
-│   │       ├── repository/
-│   │       ├── service/
-│   │       └── ui/
-│   └── resources/
-└── test/
-    └── java/
+
+## Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.

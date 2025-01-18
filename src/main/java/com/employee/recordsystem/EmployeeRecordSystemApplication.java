@@ -2,12 +2,27 @@ package com.employee.recordsystem;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import org.springframework.context.ConfigurableApplicationContext;
+import com.employee.recordsystem.ui.MainFrame;
+
+import javax.swing.*;
 
 @SpringBootApplication
-@EnableSwagger2
 public class EmployeeRecordSystemApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(EmployeeRecordSystemApplication.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(EmployeeRecordSystemApplication.class, args);
+        
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                
+                MainFrame mainFrame = context.getBean(MainFrame.class);
+                mainFrame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        });
     }
 }

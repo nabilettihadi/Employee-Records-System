@@ -1,73 +1,54 @@
 package com.employee.recordsystem.ui.panels;
 
 import com.employee.recordsystem.ui.MainFrame;
-import net.miginfocom.swing.MigLayout;
+import org.springframework.stereotype.Component;
+
 import javax.swing.*;
 import java.awt.*;
 
+@Component
 public class NavigationPanel extends JPanel {
-    
     private final MainFrame mainFrame;
-    private final JLabel userLabel;
-    private final JLabel roleLabel;
+    private JLabel userInfoLabel;
 
     public NavigationPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        setLayout(new MigLayout("fillx", "[]", "[]20[][]20[]"));
-        setPreferredSize(new Dimension(200, 0));
-        setBackground(new Color(51, 51, 51));
-        
-        // User info section
-        userLabel = new JLabel("Not logged in");
-        roleLabel = new JLabel("");
-        styleLabel(userLabel);
-        styleLabel(roleLabel);
-        
+        initializeUI();
+    }
+
+    private void initializeUI() {
+        setLayout(new BorderLayout());
+        setPreferredSize(new Dimension(200, getHeight()));
+        setBorder(BorderFactory.createEtchedBorder());
+
+        // User info panel at the top
+        JPanel userPanel = new JPanel(new BorderLayout());
+        userPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        userInfoLabel = new JLabel("Not logged in");
+        userPanel.add(userInfoLabel, BorderLayout.CENTER);
+        add(userPanel, BorderLayout.NORTH);
+
         // Navigation buttons
-        JButton employeesBtn = createNavButton("Employees");
-        JButton departmentsBtn = createNavButton("Departments");
-        JButton logoutBtn = createNavButton("Logout");
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Add components
-        add(userLabel, "wrap");
-        add(roleLabel, "wrap");
-        add(employeesBtn, "growx, wrap");
-        add(departmentsBtn, "growx, wrap");
-        add(logoutBtn, "growx, push, bottom");
+        addNavigationButton(buttonPanel, "Employees", e -> mainFrame.showEmployeePanel());
+        addNavigationButton(buttonPanel, "Departments", e -> mainFrame.showDepartmentPanel());
 
-        // Add actions
-        employeesBtn.addActionListener(e -> mainFrame.showEmployeePanel());
-        departmentsBtn.addActionListener(e -> mainFrame.showDepartmentPanel());
-        logoutBtn.addActionListener(e -> {
-            int result = JOptionPane.showConfirmDialog(
-                this,
-                "Are you sure you want to logout?",
-                "Logout",
-                JOptionPane.YES_NO_OPTION
-            );
-            if (result == JOptionPane.YES_OPTION) {
-                mainFrame.showLoginPanel();
-            }
-        });
+        add(buttonPanel, BorderLayout.CENTER);
     }
 
-    private JButton createNavButton(String text) {
+    private void addNavigationButton(JPanel panel, String text, java.awt.event.ActionListener listener) {
         JButton button = new JButton(text);
-        button.setForeground(Color.WHITE);
-        button.setBackground(new Color(64, 64, 64));
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setFont(new Font("Arial", Font.BOLD, 14));
-        return button;
-    }
-
-    private void styleLabel(JLabel label) {
-        label.setForeground(Color.WHITE);
-        label.setFont(new Font("Arial", Font.PLAIN, 12));
+        button.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, button.getPreferredSize().height));
+        button.addActionListener(listener);
+        panel.add(button);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
     }
 
     public void updateUserInfo(String username, String role) {
-        userLabel.setText("User: " + username);
-        roleLabel.setText("Role: " + role);
+        userInfoLabel.setText(String.format("<html>User: %s<br>Role: %s</html>", username, role));
     }
 }

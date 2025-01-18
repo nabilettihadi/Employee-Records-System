@@ -2,18 +2,26 @@ package com.employee.recordsystem.service;
 
 import com.employee.recordsystem.dto.EmployeeDTO;
 import com.employee.recordsystem.model.EmploymentStatus;
+
 import java.time.LocalDate;
 import java.util.List;
 
 public interface EmployeeService {
     EmployeeDTO createEmployee(EmployeeDTO employeeDTO);
-    EmployeeDTO updateEmployee(String employeeId, EmployeeDTO employeeDTO);
-    void deleteEmployee(String employeeId);
-    EmployeeDTO getEmployeeById(String employeeId);
+    EmployeeDTO updateEmployee(Long id, EmployeeDTO employeeDTO);
+    void deleteEmployee(Long id);
+    EmployeeDTO getEmployeeById(Long id);
+    
+    // Search methods
+    List<EmployeeDTO> searchByName(String name);
+    List<EmployeeDTO> searchById(String employeeId);
+    List<EmployeeDTO> searchByDepartment(String departmentName);
+    List<EmployeeDTO> searchByJobTitle(String jobTitle);
     List<EmployeeDTO> getAllEmployees();
-    List<EmployeeDTO> searchEmployees(String searchTerm);
+    
+    // Existing search methods
+    List<EmployeeDTO> findEmployees(String name, String employeeId, Long departmentId, 
+            String jobTitle, EmploymentStatus status, LocalDate hireDateFrom, LocalDate hireDateTo);
+    List<EmployeeDTO> searchEmployees(String query, Long departmentId, EmploymentStatus status);
     List<EmployeeDTO> getEmployeesByDepartment(Long departmentId);
-    List<EmployeeDTO> getEmployeesByStatus(EmploymentStatus status);
-    List<EmployeeDTO> getEmployeesByHireDateRange(LocalDate startDate, LocalDate endDate);
-    boolean isEmployeeIdUnique(String employeeId);
 }

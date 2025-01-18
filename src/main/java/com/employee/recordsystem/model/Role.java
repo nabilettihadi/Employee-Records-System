@@ -1,9 +1,11 @@
 package com.employee.recordsystem.model;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import javax.persistence.*;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -17,8 +19,11 @@ public class Role {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(unique = true, nullable = false)
+    @Column(length = 20)
     private RoleType name;
+
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users;
 
     public enum RoleType {
         ROLE_ADMIN,
