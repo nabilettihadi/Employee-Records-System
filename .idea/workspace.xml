@@ -4,40 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="33941b40-897c-42e9-b35a-a29b663ab99f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/EmployeeRecordSystemApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/EmployeeRecordSystemApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/controller/AuditController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/controller/AuditController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/controller/DepartmentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/controller/DepartmentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/controller/EmployeeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/controller/EmployeeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/dto/DepartmentDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/dto/DepartmentDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/dto/EmployeeDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/dto/EmployeeDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/dto/auth/JwtAuthenticationResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/dto/auth/JwtAuthenticationResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/dto/auth/LoginRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/dto/auth/LoginRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/AuditLog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/AuditLog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/Department.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/Department.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/Employee.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/Employee.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/Role.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/model/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/repository/EmployeeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/repository/EmployeeRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/security/JwtAuthenticationEntryPoint.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/security/JwtAuthenticationEntryPoint.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/security/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/security/JwtAuthenticationFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/security/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/service/EmployeeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/service/EmployeeService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/service/impl/DepartmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/service/impl/DepartmentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/service/impl/EmployeeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/service/impl/EmployeeServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/MainFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/MainFrame.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/dialogs/DeleteConfirmationDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/dialogs/DeleteConfirmationDialog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/dialogs/EmployeeDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/dialogs/EmployeeDialog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/panels/DepartmentPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/panels/DepartmentPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/panels/EmployeePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/panels/EmployeePanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/panels/LoginPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/panels/LoginPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/panels/NavigationPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/employee/recordsystem/ui/panels/NavigationPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-    </list>
+    <list default="true" id="33941b40-897c-42e9-b35a-a29b663ab99f" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -125,7 +92,7 @@
       <updated>1737217821003</updated>
       <workItem from="1737217822128" duration="8705000" />
       <workItem from="1737227218706" duration="1285000" />
-      <workItem from="1737230258470" duration="1065000" />
+      <workItem from="1737230258470" duration="1394000" />
     </task>
     <servers />
   </component>
