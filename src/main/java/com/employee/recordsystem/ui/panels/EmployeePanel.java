@@ -7,6 +7,8 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.List;
 
@@ -65,6 +67,19 @@ public class EmployeePanel extends JPanel {
         employeeTable.getTableHeader().setBackground(new Color(240, 240, 240));
         employeeTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         
+        // Add mouse listener for table actions
+        employeeTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                int row = employeeTable.rowAtPoint(evt.getPoint());
+                int col = employeeTable.columnAtPoint(evt.getPoint());
+                if (row >= 0 && col == employeeTable.getColumnCount() - 1) {
+                    String employeeId = (String) employeeTable.getValueAt(row, 0);
+                    showTableActionPopup(evt.getComponent(), evt.getX(), evt.getY(), employeeId);
+                }
+            }
+        });
+        
         // Add components to main panel
         add(createTitlePanel(), "growx, wrap");
         add(toolbarPanel, "growx, wrap");
@@ -89,8 +104,69 @@ public class EmployeePanel extends JPanel {
     }
 
     private void showAddEmployeeDialog() {
-        // TODO: Implement add employee dialog with service integration
-        JOptionPane.showMessageDialog(this, "Add Employee Dialog - To be implemented");
+        EmployeeDialog dialog = new EmployeeDialog(
+            (Frame) SwingUtilities.getWindowAncestor(this),
+            "Add Employee",
+            null
+        );
+        dialog.setVisible(true);
+        
+        if (dialog.isApproved()) {
+            try {
+                EmployeeDTO newEmployee = dialog.getEmployee();
+                employeeService.createEmployee(newEmployee);
+                loadEmployeeData();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this,
+                    "Error creating employee: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void showEditEmployeeDialog(String employeeId) {
+        try {
+            EmployeeDTO employee = employeeService.getEmployee(employeeId);
+            EmployeeDialog dialog = new EmployeeDialog(
+                (Frame) SwingUtilities.getWindowAncestor(this),
+                "Edit Employee",
+                employee
+            );
+            dialog.setVisible(true);
+            
+            if (dialog.isApproved()) {
+                employeeService.updateEmployee(employeeId, dialog.getEmployee());
+                loadEmployeeData();
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Error editing employee: " + ex.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void deleteEmployee(String employeeId) {
+        try {
+            EmployeeDTO employee = employeeService.getEmployee(employeeId);
+            DeleteConfirmationDialog dialog = new DeleteConfirmationDialog(
+                (Frame) SwingUtilities.getWindowAncestor(this),
+                "employee",
+                employee.getName()
+            );
+            dialog.setVisible(true);
+            
+            if (dialog.isConfirmed()) {
+                employeeService.deleteEmployee(employeeId);
+                loadEmployeeData();
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Error deleting employee: " + ex.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void performSearch() {
@@ -154,5 +230,20 @@ public class EmployeePanel extends JPanel {
                 "Edit/Delete"
             });
         }
+    }
+
+    private void showTableActionPopup(Component component, int x, int y, String employeeId) {
+        JPopupMenu popup = new JPopupMenu();
+        
+        JMenuItem editItem = new JMenuItem("Edit");
+        editItem.addActionListener(e -> showEditEmployeeDialog(employeeId));
+        
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        deleteItem.addActionListener(e -> deleteEmployee(employeeId));
+        
+        popup.add(editItem);
+        popup.add(deleteItem);
+        
+        popup.show(component, x, y);
     }
 }
